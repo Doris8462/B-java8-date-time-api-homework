@@ -1,6 +1,9 @@
 package com.thoughtworks.capability.gtb;
 
 import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -18,24 +21,38 @@ import java.time.format.DateTimeFormatter;
 public class MeetingSystemV3 {
 
   public static void main(String[] args) {
+    // 创建伦敦所在的时区
+    ZoneId londonZoneId = ZoneId.of("Europe/London");
+    // 创建中国所在的时区
+    ZoneId chinaZoneId = ZoneId.of("Asia/Shanghai");
+    // 创建芝加哥所在的时区
+    ZoneId chicagoZoneId = ZoneId.of("America/Chicago");
+
     String timeStr = "2020-04-01 14:30:00";
+
 
     // 根据格式创建格式化类
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     // 从字符串解析得到会议时间
     LocalDateTime meetingTime = LocalDateTime.parse(timeStr, formatter);
 
-    LocalDateTime now = LocalDateTime.now();
-    if (now.isAfter(meetingTime)) {
-      LocalDateTime tomorrow = now.plusDays(1);
-      int newDayOfYear = tomorrow.getDayOfYear();
-      meetingTime = meetingTime.withDayOfYear(newDayOfYear);
+    ZonedDateTime londonZonedDateTime = LocalDateTime.parse(timeStr, formatter).atZone(londonZoneId);
+    System.out.println("伦敦会议时间：" + formatter.format(londonZonedDateTime));
+    ZonedDateTime chinaZonedDateTime = londonZonedDateTime.withZoneSameInstant(chinaZoneId);
+    System.out.println("中国会议时间：" + formatter.format(chinaZonedDateTime));
 
-      // 格式化新会议时间
-      String showTimeStr = formatter.format(meetingTime);
-      System.out.println(showTimeStr);
+    ZonedDateTime now = LocalDateTime.now().atZone(chinaZoneId);
+    if (now.isAfter(chinaZonedDateTime)) {
+      Period period = Period.ofDays(1);
+      ZonedDateTime newChinaZonedDate =now.plus(period);
+      chinaZonedDateTime = chinaZonedDateTime.withDayOfYear(newChinaZonedDate.getDayOfYear());
+      System.out.println("中国新会议时间：" + formatter.format(chinaZonedDateTime));
+      // 格式化新芝加哥会议时间
+      ZonedDateTime chicagoZonedDateTime = chinaZonedDateTime.withZoneSameInstant(chicagoZoneId);
+      System.out.println("芝加哥新会议时间：" + formatter.format(chicagoZonedDateTime));
     } else {
       System.out.println("会议还没开始呢");
     }
   }
-}
+  }
+
